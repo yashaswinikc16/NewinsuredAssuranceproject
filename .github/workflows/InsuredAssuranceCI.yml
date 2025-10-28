@@ -16,3 +16,25 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+
+    - name: Setup Maven Action
+      uses: s4u/setup-maven-action@1.7.0
+      with:
+          checkout-fetch-depth: 0
+          java-version: 17
+          java-distribution: temurin
+          maven-version: 3.9.8
+
+    - name: Test with Maven
+      run: mvn -B test --file pom.xml
+
+    - name: Connect to Lab and Trigger Jenkins Job
+      uses: cross-the-world/ssh-scp-ssh-pipelines@latest
+      with:
+        host: ${{  secrets.LAB_HOSTNAME  }}
+        user: ${{  secrets.LAB_USERNAME  }}
+        pass: ${{  secrets.LAB_PASSWORD  }}
+        port: ${{  secrets.LAB_PORT  }}
+        connect_timeout: 10s
+        first_ssh: |
+     sudo curl -I -u admin:110f22c3db056391d6cb0a7cfbe94fb3d6 http://localhost:8080/user/insuredassurance/build?token=my_custom_token:
